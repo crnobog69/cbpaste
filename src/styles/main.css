@@ -84,7 +84,7 @@ textarea:focus {
 button {
   background: rgba(166, 227, 161, 0.05);
   color: #a6e3a1;
-  padding: 0.8rem;
+  padding: 0;
   border: 1px solid rgba(166, 227, 161, 0.1);
   border-radius: 12px;
   cursor: pointer;
@@ -173,4 +173,6 @@ button:hover {
 .send-icon {
   width: 24px;
   height: 24px;
+  display: block;
+  margin: auto;
 }
