@@ -19,8 +19,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function getWebhookUrl() {
   try {
+    console.log("Fetching webhook URL..."); // Debug log
     const response = await fetch("/api/getWebhookUrl");
+    console.log("Response received:", response.status); // Debug log
+
     const data = await response.json();
+    console.log("Data received:", data); // Debug log
+
+    if (data.error) {
+      console.error("Webhook URL error:", data);
+      return null;
+    }
+
     return data.webhookUrl;
   } catch (error) {
     console.error("Error fetching webhook URL:", error);
@@ -38,19 +48,26 @@ async function sendMessage() {
     return;
   }
 
-  const webhookUrl = await getWebhookUrl();
-  if (!webhookUrl) {
-    statusDiv.className = "status error";
-    statusDiv.textContent =
-      "Грешка при добијању webhook URL-а. Контактирајте администратора.";
-    return;
-  }
-
-  const payload = {
-    content: message,
-  };
+  statusDiv.className = "status";
+  statusDiv.textContent = "Слање поруке...";
 
   try {
+    console.log("Getting webhook URL..."); // Debug log
+    const webhookUrl = await getWebhookUrl();
+    console.log("Webhook URL received:", webhookUrl ? "Yes" : "No"); // Debug log
+
+    if (!webhookUrl) {
+      statusDiv.className = "status error";
+      statusDiv.textContent =
+        "Грешка при добијању webhook URL-а. Проверите конзолу за више детаља.";
+      return;
+    }
+
+    const payload = {
+      content: message,
+    };
+
+    console.log("Sending message to Discord..."); // Debug log
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
@@ -58,17 +75,20 @@ async function sendMessage() {
       },
       body: JSON.stringify(payload),
     });
+    console.log("Discord response status:", response.status); // Debug log
 
     if (response.ok) {
       statusDiv.className = "status success";
       statusDiv.textContent = "Порука је успешно послата!";
       document.getElementById("message").value = "";
-      // Reset height after clearing
       autoResize(document.getElementById("message"));
     } else {
+      const errorText = await response.text();
+      console.error("Discord error response:", errorText); // Debug log
       throw new Error(`HTTP error! status: ${response.status}`);
     }
   } catch (error) {
+    console.error("Full error:", error); // Debug log
     statusDiv.className = "status error";
     statusDiv.textContent = `Грешка при слању поруке: ${error.message}`;
   }
